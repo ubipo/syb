@@ -1,0 +1,10 @@
+*
+!/.gitignore
+
+# Config
+!/etc/
+
+# Home (scripts)
+!/root/
+!/home/
+!/home/pieter/
