@@ -1,0 +1,2 @@
+# Allow check user to run check_apt and arp
+check ALL=(root) NOPASSWD: /usr/lib/nagios/plugins/check_apt, /usr/sbin/arp

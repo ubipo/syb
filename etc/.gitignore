@@ -9,3 +9,8 @@
 !/default/
 /default/*
 !/default/locale
+
+# sudo
+!/sudoers.d/
+/sudoers.d/*
+!/sudoers.d/check_user
