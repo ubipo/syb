@@ -1,5 +1,11 @@
 /*
 !/.gitignore
 
+# sshguard
 !/sshguard/
 !/sshguard/*
+
+# locale
+!/default/
+/default/*
+!/default/locale
