@@ -4,3 +4,8 @@
 # Address blocks in CIDR notation
 127.0.0.0/8
 ::1/128
+
+# Mister T
+193.191.177.6
+
+# Cannot add own (dynamic ip)
