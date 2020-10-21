@@ -1,8 +1,8 @@
-*
-!*/
+/**/*
+!/*/
 
 # sshguard
-!/sshguard/
+!/sshguard/*
 
 # locale
 !/default/locale
@@ -13,5 +13,6 @@
 # apt
 !/apt/apt.conf.d/50unattended-upgrades
 
-# 
+# scripts
+!/scripts/**/*
 
