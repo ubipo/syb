@@ -1,2 +1,7 @@
 # Allow check user to run check_apt and arp
 check ALL=(root) NOPASSWD: /usr/lib/nagios/plugins/check_apt, /usr/sbin/arp
+
+# Allow DNS scripts
+check ALL=(root) NOPASSWD: /etc/scripts/*
+check ALL=(root) NOPASSWD: /usr/sbin/nginx -s reload
+
