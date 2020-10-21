@@ -1,0 +1,7 @@
+[Unit]
+Description="Incron backup configuration script for automatic /etc backups"
+
+[Service]
+Type=oneshot
+ExecStart=/etc/scripts/incron_config.sh
+
