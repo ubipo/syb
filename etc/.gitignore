@@ -1,5 +1,5 @@
 /**/*
-!/*/
+!/**/
 
 # sshguard
 !/sshguard/*
@@ -15,4 +15,7 @@
 
 # scripts
 !/scripts/**/*
+
+# systemd units
+!/systemd/system/*
 
