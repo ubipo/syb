@@ -3,7 +3,8 @@ Description="Incron backup configuration timer for automatic /etc backups"
 
 [Timer]
 OnUnitActiveSec=0m
-OnCalendar=*:0/15 # Every 15 minutes
+# Every 15 minutes
+OnCalendar=*:0/15
 
 [Install]
 WantedBy=timers.target
