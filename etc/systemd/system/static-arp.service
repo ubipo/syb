@@ -1,0 +1,9 @@
+[Unit]
+Description="Static ARP configuration script"
+
+[Service]
+Type=oneshot
+ExecStart=/etc/scripts/static-arp
+
+[Install]
+WantedBy=network.target
