@@ -1,11 +1,18 @@
-/*
-!/.gitignore
+*
+!*/
 
 # Config
 !/etc/
 
-# Home (scripts)
-!/root/
-!/home/
-/home/*
-!/home/pieter/
+# Ignore system folders (speeds up git status)
+/lib/
+/lib64/
+/mnt/
+/proc/
+/run/
+/sbin/
+/snap/
+/srv/
+/sys/
+/tmp/
+

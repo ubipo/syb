@@ -1,16 +1,17 @@
-/*
-!/.gitignore
+*
+!*/
 
 # sshguard
 !/sshguard/
-!/sshguard/*
 
 # locale
-!/default/
-/default/*
 !/default/locale
 
 # sudo
-!/sudoers.d/
-/sudoers.d/*
 !/sudoers.d/check_user
+
+# apt
+!/apt/apt.conf.d/50unattended-upgrades
+
+# 
+
