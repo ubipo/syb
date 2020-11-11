@@ -19,3 +19,9 @@
 # systemd units
 !/systemd/system/*
 
+# NTP
+!/ntp.conf
+
+# Dovecot
+!/dovecot/**
+

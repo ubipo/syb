@@ -5,3 +5,6 @@
 !incron-backup-config.timer
 !incron-backup-config.service
 
+# ARP
+!static-arp.service
+
