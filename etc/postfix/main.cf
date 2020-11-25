@@ -33,21 +33,25 @@ smtpd_tls_security_level = may
 #smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 
-#smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
-myhostname = pieter-fiers.sb.uclllabs.be
+myhostname = mx.pieter-fiers.sb.uclllabs.be
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = /etc/mailname
-mydestination = pieter-fiers.localdomain, localhost.localdomain, localhost
+mydestination = $myhostname, pieter-fiers.localdomain, localhost.localdomain, localhost
 relayhost = 
-mynetworks = 127.0.0.1/32 193.191.177.190/32 [::1]/128 [fe80::70b3:5ff:febe:5ef9]/128
+mynetworks = 127.0.0.0/8 193.191.177.190/32 [::1]/128 [fe80::70b3:5ff:febe:5ef9]/128
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
 inet_protocols = all
 
 virtual_transport = lmtp:unix:private/dovecot-lmtp
-virtual_mailbox_domains = $myhostname
+virtual_mailbox_domains = pieter-fiers.sb.uclllabs.be
 virtual_mailbox_maps = hash:/etc/postfix/vmailbox
 virtual_alias_maps = hash:/etc/postfix/virtual
+
+smtpd_sasl_type = dovecot
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
 
