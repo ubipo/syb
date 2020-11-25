@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This file is needed because python files must end with ".py" in order for imports to work
+
+cd "$(dirname "$0")"
+cd http
+./http_add_vhost.py "$@"
