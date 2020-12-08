@@ -1,0 +1,262 @@
+---
+- hosts: localhost
+  collections:
+    - nginxinc.nginx_core
+  tasks:
+    - name: install nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: create log directories
+      file:
+        path: "/var/log/nginx/{{ item }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: 0775
+      loop:
+        - root # host fallback, db check
+        - www1 # toupper
+        - www2 # http basic
+        - secure # tls
+        - supersecure # tls, hsts
+        - kibana
+        - ntopng
+    
+    - name: configure nginx
+      include_role:
+        name: nginx_config
+      vars:
+        nginx_config_main_template_enable: true
+        nginx_config_main_template:
+          template_file: nginx.conf.j2
+          conf_file_name: nginx.conf
+          conf_file_location: /etc/nginx/
+          user: www-data
+          worker_processes: auto
+          worker_connections: 768
+          http_enable: true
+          http_settings:
+            default_type: application/octet-stream
+            access_log_format: []
+            keepalive_timeout: 65
+            cache: false
+            rate_limit: false
+            keyval: false
+          stream_enable: false
+
+        nginx_config_http_template_enable: true
+        nginx_config_http_template:
+          app:
+            template_file: http/default.conf.j2
+            servers:
+              root:
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/root/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/root/error.log
+                web_server:
+                  locations:
+                    main_site:
+                      location: /
+                      custom_options:
+                        - uwsgi_pass unix:/etc/scripts/http-flask-root/server.sock;
+                        - include uwsgi_params;
+              www1:
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: www1.pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/www1/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/www1/error.log
+                web_server:
+                  root: /var/www/www1
+                  locations:
+                    main_site:
+                      location: /
+                      try_files: /index.txt =404
+                    private:
+                      location: /private
+                      auth_basic: www1 private
+                      auth_basic_user_file: www1-private.htpasswd
+                      try_files: /private.txt =404
+              www2: 
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: www2.pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/www2/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/www2/error.log
+                web_server:
+                  locations:
+                    main_site:
+                      location: /
+                      include_files:
+                        - "uwsgi_params"
+                      custom_options:
+                        - uwsgi_pass unix:/etc/scripts/http-flask-root/server.sock;
+              secure:
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: secure.pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/secure/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/secure/error.log
+                web_server:
+                  root: /var/www/secure
+                  locations:
+                    main_site:
+                      location: /
+                      try_files: /index.txt =404
+              supersecure:
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: supersecure.pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/supersecure/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/supersecure/error.log
+                web_server:
+                  root: /var/www/supersecure
+                  locations:
+                    main_site:
+                      location: /
+                      try_files: /index.txt =404
+              kibana: 
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: kibana.pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/kibana/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/kibana/error.log
+                reverse_proxy:
+                  locations:
+                    main_site:
+                      location: /
+                      proxy_http_version: 1.1
+                      proxy_pass: http://127.0.0.1:5601
+                      proxy_set_header:
+                        upgrade:
+                          name: Upgrade
+                          value: $http_upgrade
+                        connection:
+                          name: Connection
+                          value: "upgrade"
+                        host:
+                          name: Host
+                          value: $host
+                        realIp:
+                          name: X-Real-IP
+                          value: $remote_addr
+                        forwardedFor:
+                          name: X-Forwarded-For
+                          value: $proxy_add_x_forwarded_for
+                        forwardedProto:
+                          name: X-Forwarded-Proto
+                          value: $scheme
+                        forwardedHost:
+                          name: X-Forwarded-Host
+                          value: $host
+                        forwardedPort:
+                          name: X-Forwarded-Port
+                          value: $server_port
+                      include_files:
+                        - "uwsgi_params"
+                      custom_options:
+                        - proxy_cache_bypass $http_upgrade
+                        - uwsgi_pass unix:/etc/scripts/http-flask-root/server.sock;
+              
+              ntopng: 
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: ntopng.pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/ntopng/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/ntopng/error.log
+                reverse_proxy:
+                  locations:
+                    main_site:
+                      location: /
+                      proxy_http_version: 1.1
+                      proxy_pass: http://127.0.0.1:3000
+                      proxy_set_header:
+                        upgrade:
+                          name: Upgrade
+                          value: $http_upgrade
+                        connection:
+                          name: Connection
+                          value: "upgrade"
+                        host:
+                          name: Host
+                          value: $host
+                        realIp:
+                          name: X-Real-IP
+                          value: $remote_addr
+                        forwardedFor:
+                          name: X-Forwarded-For
+                          value: $proxy_add_x_forwarded_for
+                        forwardedProto:
+                          name: X-Forwarded-Proto
+                          value: $scheme
+                        forwardedHost:
+                          name: X-Forwarded-Host
+                          value: $host
+                        forwardedPort:
+                          name: X-Forwarded-Port
+                          value: $server_port
+                      include_files:
+                        - "uwsgi_params"
+                      custom_options:
+                        - proxy_cache_bypass $http_upgrade
+                        - uwsgi_pass unix:/etc/scripts/http-flask-root/server.sock;
+
+              mx:
+                # Dummy, needed for ACME HTTP verification
+                listen:
+                  listen_localhost:
+                    port: 80
+                server_name: mx.pieter-fiers.sb.uclllabs.be
+                access_log:
+                  - name: combined
+                    location: /var/log/nginx/supersecure/access.log
+                error_log:
+                  level: warn
+                  location: /var/log/nginx/supersecure/error.log
+                web_server:
+                  locations:
+                    main_site:
+                      location: /
+                      try_files: /index.txt =404
+  
+    - name: ACME
+      shell: /etc/scripts/certbot_renew.sh
