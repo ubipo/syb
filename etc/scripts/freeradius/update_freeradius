@@ -1,0 +1,56 @@
+#!/bin/sh
+
+script_dir=$(realpath .)
+
+# fix debian /usr/local sgid stuff
+chmod g-s /usr/local
+chgrp root /usr/local
+chmod 755 /usr/local
+
+# On a fresh install, add the necessary user and group
+adduser --quiet --system --no-create-home --home /etc/freeradius --group --disabled-password freerad
+# Put user freerad in group shadow, so the daemon can auth locally
+adduser --quiet freerad shadow
+adduser --quiet freerad ssl-cert
+
+# clone the freeradius git repository
+cd /usr/local/src
+git clone https://github.com/FreeRADIUS/freeradius-server
+cd freeradius-server
+git checkout v3.0.x
+
+git pull origin
+git log -n 1 --pretty=format:%h
+
+fakeroot debian/rules debian/control
+fakeroot debian/rules clean
+mk-build-deps --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' -ir debian/control
+
+make clean
+hash=`git log -n 1 --pretty=format:%h`
+./configure \
+        --prefix="/usr/local/freeradius-$hash" \
+        --mandir=/usr/share/man \
+        --localstatedir=/var \
+        --disable-developer
+#       --with-openssl \                                # default now
+make
+make install
+
+mkdir /usr/local/etc
+mv /usr/local/freeradius-$hash/etc/raddb /usr/local/etc
+ln -s /usr/local/etc/raddb /usr/local/freeradius-$hash/etc/raddb
+ln -s /usr/local/freeradius-$hash /usr/local/freeradius
+
+#fix permissions
+chgrp -R freerad /usr/local/etc
+find /usr/local/etc -type f -print0 | xargs -0 chmod 640
+find /usr/local/etc -type d -print0 | xargs -0 chmod 750
+chmod g+s /usr/local/etc/raddb/sites-available
+chmod g+s /usr/local/etc/raddb/sites-enabled
+chmod g+s /usr/local/etc/raddb/certs
+
+# Add systemd unit file
+cp "$script_dir/freeradius.service" /etc/systemd/system/
+systemctl daemon-reload
+
