@@ -1,0 +1,20 @@
+---
+- hosts: localhost
+  tasks:
+    - name: install dependencies
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - libkqueue-dev
+        - libtalloc-dev
+        - libssl-dev
+
+    - name: update freeradius
+      shell: /etc/scripts/freeradius/update_freeradius
+
+    - name: enable and start freeradius service
+      systemd:
+        name: freeradius
+        state: started
+        enabled: yes
