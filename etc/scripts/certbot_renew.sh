@@ -11,5 +11,6 @@ certbot -n --agree-tos --expand --nginx --no-redirect --email pieter@pfiers.net 
         -d secure.pieter-fiers.sb.uclllabs.be \
         -d supersecure.pieter-fiers.sb.uclllabs.be \
 	-d mx.pieter-fiers.sb.uclllabs.be \
-	-d pieter-fiers.sb.uclllabs.be
+	-d pieter-fiers.sb.uclllabs.be \
+	-d kibana.pieter-fiers.sb.uclllabs.be
 
