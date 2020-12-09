@@ -34,3 +34,6 @@
 # Ansible
 !/ansible/**
 
+# Git push test
+!/test/**
+
